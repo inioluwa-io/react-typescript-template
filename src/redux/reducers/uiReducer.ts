@@ -14,7 +14,7 @@ type ActionType = {
   readonly payload: any
 }
 
-const userReducer: Reducer<UserState, ActionType> = (
+const uiReducer: Reducer<UserState, ActionType> = (
   state = initialState,
   action
 ) => {
@@ -28,4 +28,4 @@ const userReducer: Reducer<UserState, ActionType> = (
       return state
   }
 }
-export default userReducer
+export default uiReducer

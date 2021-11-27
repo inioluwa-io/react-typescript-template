@@ -1,4 +1,13 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+/* eslint-disable no-unused-vars */
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  MutableRefObject,
+  Dispatch,
+  SetStateAction,
+} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AxiosRequestConfig } from 'axios'
 import { UserState } from '../redux/reducers/userReducer'
@@ -90,6 +99,84 @@ export const useIsMounted = () => {
   return isMounted
 }
 
+type ToggleState = (initialValue?: boolean) => [boolean, () => void]
+/**
+ * Allow you toggle a boolean value between true or false
+ * @param {boolean} [initialValue]
+ * */
+export const useToggle: ToggleState = (initialValue = false) => {
+  const [state, setState] = useState(initialValue)
+
+  const toggle = useCallback(() => {
+    setState((prev) => !prev)
+  }, [])
+
+  return [state, toggle]
+}
+
+type EventListenerState = (
+  event: keyof HTMLElementEventMap,
+  handler: EventListenerOrEventListenerObject,
+  referencedElement: MutableRefObject<HTMLElement>
+) => void
+
+export const useEventListener: EventListenerState = (
+  event,
+  handler,
+  referencedElement
+) => {
+  // effect for binding event handler to the element
+  useEffect(() => {
+    const element = referencedElement?.current || window
+
+    const isSupported = element && element.addEventListener
+
+    if (!isSupported) return
+
+    // bind event to the element
+    element.addEventListener(event, handler)
+
+    return () => element.removeEventListener(event, handler)
+  }, [referencedElement, event, handler])
+}
+
+export type LocalStorageState = <T = any>(
+  key: string,
+  defaultValue?: any
+) => [T, Dispatch<SetStateAction<T>>]
+
+export const useLocalStorageState: LocalStorageState = (
+  key,
+  defaultValue = ''
+) => {
+  const [value, setValue] = useState(() => {
+    let val
+
+    try {
+      // if there is a value in local storage for given key, set it as initial state
+      val = JSON.parse(localStorage.getItem(key) || String(defaultValue))
+    } catch (error) {
+      // otherwise, set default value as initial state
+      val = defaultValue
+    }
+
+    return val
+  })
+
+  // effect to update local storage when state changes
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value))
+  }, [value])
+
+  return [value, setValue]
+}
+
+export type CartState = { name: string; quantity: number }
+
+export const useCart = () => {
+  return useLocalStorageState<CartState[]>('@Cart', [])
+}
+
 /**
  * Allow you change our UI based upon a host of media features (most commonly the size of the window)
  * @param {string} query css media query
@@ -129,7 +216,7 @@ export const useMedia = (query: string): boolean => {
 }
 
 type DispatchUser = (payload: UserState) => void
-export type UserQueryState = () => { user: UserState; setUser: DispatchUser }
+export type UserQueryState = () => [UserState, DispatchUser]
 
 /**
  * Allow you have access to the user reducer in redux store
@@ -148,10 +235,14 @@ export const useQueryUser: UserQueryState = () => {
     [dispatch]
   )
 
-  return { user: queryUser, setUser: setQueryUser }
+  return [queryUser, setQueryUser]
 }
 
-export type AxiosState = (params: AxiosRequestConfig) => any
+export type AxiosState = (params: AxiosRequestConfig) => {
+  loading: boolean
+  error: unknown
+  response: unknown
+}
 
 /**
  * Allow you make axios request
@@ -159,7 +250,7 @@ export type AxiosState = (params: AxiosRequestConfig) => any
  * @returns {object} an object of loading state, error, and response data
  * */
 export const useAxios: AxiosState = (params) => {
-  const [response, setResponse] = useState<any>(undefined)
+  const [response, setResponse] = useState<unknown>(undefined)
   const [error, setError] = useState<unknown>('')
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -188,6 +279,11 @@ const hooks = {
   useInitialMount,
   useIsMounted,
   useQueryUser,
+  useToggle,
+  useAxios,
+  useLocalStorageState,
+  useCart,
+  useEventListener,
 }
 
 export default hooks

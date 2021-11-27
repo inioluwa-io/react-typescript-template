@@ -1,1 +1,2 @@
-export default { baseUrl: '' }
+const theme = {}
+export default { baseUrl: '', theme }
