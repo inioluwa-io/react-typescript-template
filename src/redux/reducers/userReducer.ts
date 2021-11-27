@@ -1,29 +1,29 @@
 import { Reducer } from 'react'
-import { FETCH_USER } from '../types'
+import { SET_USER } from '../types'
 
-type State = {
+export type UserState = {
   firstName: string
 }
 
-const initialState: State = {
+const initialState: UserState = {
   firstName: '',
 }
 
 type ActionType = {
   /* eslint no-global-assign: "error" */
-  readonly type: typeof FETCH_USER
+  readonly type: typeof SET_USER
   readonly payload: any
 }
 
-const resourceReducer: Reducer<State, ActionType> = (
+const resourceReducer: Reducer<UserState, ActionType> = (
   state = initialState,
   action
 ) => {
   switch (action.type) {
-    case FETCH_USER:
+    case SET_USER:
       return {
         ...state,
-        firstName: action.payload,
+        ...action.payload,
       }
     default:
       return state

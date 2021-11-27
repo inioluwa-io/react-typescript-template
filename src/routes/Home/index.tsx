@@ -1,13 +1,22 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import logo from '../../logo.svg'
+import { useQueryUser } from '../../lib/hooks'
 
-function App() {
+const App: React.FC = () => {
+  const { user, setUser } = useQueryUser()
+
+  useEffect(() => {
+    setTimeout(() => {
+      setUser({ firstName: 'Ini' })
+    }, 2000)
+  }, [])
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload.
+          Edit <code>src/App.tsx</code> and save to reload. {user.firstName}
         </p>
         <a
           className="App-link"
