@@ -140,9 +140,9 @@ export const useEventListener: EventListenerState = (
   }, [referencedElement, event, handler])
 }
 
-export type LocalStorageState = <T = any>(
+export type LocalStorageState = <T = unknown>(
   key: string,
-  defaultValue?: any
+  defaultValue?: unknown
 ) => [T, Dispatch<SetStateAction<T>>]
 
 export const useLocalStorageState: LocalStorageState = (
